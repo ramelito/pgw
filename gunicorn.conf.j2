@@ -1,7 +1,6 @@
 [program:gunicorn]
 command=/usr/local/bin/gunicorn pgw:app -c /home/{{ username }}/gunicorn.conf.py
 directory=/home/{{ username }}
-user=root
 autostart=true
 autorestart=true
 redirect_stderr=true
