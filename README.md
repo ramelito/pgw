@@ -1,9 +1,9 @@
 # Payment Gateways Virtual Network Function
 
-## Overview
+### Overview
 Payment Gateways VNF is based on netfilter iptables and delivers easy and convinient way to manage payment gateways ipv4 addresses. The main idea behind this approach is to handle packets only on IP layer. Packets destined to payment gateway are accepted and forwarded, other HTTP (port 80) traffic is transparently redirected to the portal login page. Furthermore this approach is not limited only to payment gateways but can accept any opengarden domains.
 
-## Installation
+### Installation
 To easily install pgw one can use Ansible playbook pgw.yml.
 As a base image it is recommened to use Ubuntu 14.04.
 VNF has 3 interfaces, eth1 (in) and eth2 (out) are defined in playbook:
@@ -35,7 +35,7 @@ where invetory file may look like:
 ```
 where 10.0.0.101 is a management ip address mentioned earlier.
 
-## REST API
+### REST API
 VNF is equipped with RESTful API to peer with orchestrating system. Here are the available REST API operations:
 
 **pgws**
@@ -50,7 +50,7 @@ VNF is equipped with RESTful API to peer with orchestrating system. Here are the
 
 `GET` `/pgw/api/v1.0/pgws/reload` - reloads iptables with domain names
 
-### REST API examples
+#### REST API examples
 ```
 curl -i http://10.0.0.101/pgw/api/v1.0/pgws
 ```
@@ -141,7 +141,7 @@ Chain PAYMENT_GW (1 references)
     0     0 ACCEPT     all  --  *      *       0.0.0.0/0            23.59.86.34          /* www.paypal.com */
 
 ```
-## Packet Flow
+### Packet Flow
 Before any packet processing will occur PGW VNF must be programmed with Orchestrator via REST API, then it translates payment gateways domain names to ip addresses and install them into iptables.
 
 ```
