@@ -1,6 +1,6 @@
 [program:gunicorn]
-command=/usr/local/bin/gunicorn pgw:app -c /home/{{ ansible_user_id }}/gunicorn.conf.py
-directory=/home/{{ ansible_user_id }}
+command=/usr/local/bin/gunicorn pgw:app -c /home/{{ username }}/gunicorn.conf.py
+directory=/home/{{ username }}
 user=nobody
 autostart=true
 autorestart=true
