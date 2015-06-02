@@ -40,15 +40,15 @@ VNF is equipped with RESTful API to peer with orchestrating system. Here are the
 
 **pgws**
 
-`GET`, `POST` `/pgw/api/v1.0/pgws` - returns list of payment gateway domains; add single domain
+`GET`, `POST` `/pgw/api/v1.0/pgws` - returns list of payment gateway domains; adds single domain
 
 **pgws/<int:id>**
 
-`GET`, `DELETE` `/pgw/api/v1.0/pgws/<int:id>` - returns payment gateway domain; delete single domain
+`GET`, `DELETE` `/pgw/api/v1.0/pgws/<int:id>` - returns payment gateway domain; deletes single domain
 
 **pgws/reload**
 
-`GET` `/pgw/api/v1.0/pgws/reload` - reload iptables with domains
+`GET` `/pgw/api/v1.0/pgws/reload` - reloads iptables with domain names
 
 ### REST API examples
 ```
@@ -141,3 +141,39 @@ Chain PAYMENT_GW (1 references)
     0     0 ACCEPT     all  --  *      *       0.0.0.0/0            23.59.86.34          /* www.paypal.com */
 
 ```
+## Packet Flow
+Before any packet processing will occur PGW VNF must be programmed with Orchestrator via REST API, then it translates payment gateways domain names to ip addresses and install them into iptables.
+
+```
+
+                                                    +------------------+                         
+                                                    |                  |                         
+                                                    |   ORCHESTRATOR   |                         
+                                                    |                  |                         
+                                                    +---------+--------+                         
+                                                              | REST                             
+                                                              |                                  
+                                                              |                                  
+                                                              | eth0                             
+                           +----------+              +--------v-------+                          
+                           |          |              |                |                          
++----------+               | BRAS/BNG |              |     PGW VNF    |           +-------------+
+|SUBSCRIBER|  1            |          | 2            |                | 3         |             |
+|          +--------------->          +-------------->        +-------------------> PAYMENT GW  |
+|          |               |          |          eth1|        |       | eth2      |             |
++----------+               |          |              |        |PORTAL |           +-------------+
+                           |          |              |        |       |                          
+                           +----------+              +--------+-------+                          
+```
+1. Subscriber initiates http request to web-server in the Internet (DNS request will be transparently forwarded).
+2. BNG somehow next-hops or next-interfaces packet to PGW VNF.
+3. VNF processes all packets arrived on inbound interface eth1 with following rules:
+```
+Chain PREROUTING (policy ACCEPT 0 packets, 0 bytes)
+ pkts bytes target     prot opt in     out     source               destination         
+    0     0 ACCEPT     udp  --  eth1   *       0.0.0.0/0            0.0.0.0/0            udp dpt:53
+    0     0 PAYMENT_GW  tcp  --  eth1   *       0.0.0.0/0            0.0.0.0/0           
+    0     0 DNAT       tcp  --  eth1   *       0.0.0.0/0            0.0.0.0/0            tcp dpt:80 to:192.168.1.18:80
+    0     0 DROP       all  --  eth1   *       0.0.0.0/0            0.0.0.0/0           
+```
+packets to payment gw are proccessed with nested chain PAYMENT_GW, which is build from domain names; if packet is not destined to payment gw and has destination port 80, it is transparently redirected to portal and landed to e.g. login page or payment gw link list page, all other traffic is dropped.
