@@ -6,7 +6,7 @@ Payment Gateways VNF is based on netfilter iptables and delivers easy and convin
 ## Installation
 To easily install pgw one can use Ansible playbook pgw.yml.
 As a base image it is recommened to use Ubuntu 14.04.
-VNF has 3 interfaces, eth1 and eth2 are defined in playbook:
+VNF has 3 interfaces, eth1 (in) and eth2 (out) are defined in playbook:
 ```
     eth_in_dev: eth1
     eth_out_dev: eth2
@@ -40,8 +40,17 @@ VNF is equipped with RESTful API to peer with orchestrating system. Here are the
 
 **pgws**
 
-`GET` `/pgw/api/v1.0/pgws` - returns list of payment gateway domains
+`GET`, `POST` `/pgw/api/v1.0/pgws` - returns list of payment gateway domains; add single domain
 
+**pgws/<int:id>**
+
+`GET`, `DELETE` `/pgw/api/v1.0/pgws/<int:id>` - returns payment gateway domain; delete single domain
+
+**pgws/reload**
+
+`GET` `/pgw/api/v1.0/pgws/reload` - reload iptables with domains
+
+### REST API examples
 ```
 curl -i http://10.0.0.101/pgw/api/v1.0/pgws
 ```
@@ -82,4 +91,53 @@ curl -i http://10.0.0.101/pgw/api/v1.0/pgws
         }
     ]
 }
+```
+``` 
+curl -i -H "Content-Type: application/json" -X POST -d '{"domain":"www.webmoney.ru"}' http://10.0.0.101/pgw/api/v1.0/pgws
+```
+```
+{
+    "pgws": [
+        {
+            "domain": "www.webmoney.ru", 
+            "uri": "http://10.0.0.101/pgw/api/v1.0/pgws/23"
+        }, 
+        {
+            "domain": "unistream.ru", 
+            "uri": "http://10.0.0.101/pgw/api/v1.0/pgws/7"
+        }, 
+        {
+            "domain": "www.rbkmoney.ru", 
+            "uri": "http://10.0.0.101/pgw/api/v1.0/pgws/6"
+        }, 
+        {
+            "domain": "www.assist.ru", 
+            "uri": "http://10.0.0.101/pgw/api/v1.0/pgws/5"
+        }
+    ]
+}
+```
+result in iptables
+```
+sudo iptables -L -n -v -t nat
+```
+```
+Chain PAYMENT_GW (1 references)
+ pkts bytes target     prot opt in     out     source               destination         
+    0     0 ACCEPT     all  --  *      *       0.0.0.0/0            37.139.14.218        /* www.assist.ru */
+    0     0 ACCEPT     all  --  *      *       0.0.0.0/0            173.203.211.32       /* www.rbkmoney.ru */
+    0     0 ACCEPT     all  --  *      *       0.0.0.0/0            62.76.46.181         /* unistream.ru */
+    0     0 ACCEPT     all  --  *      *       0.0.0.0/0            217.23.144.177       /* www.webmoney.ru */
+    0     0 ACCEPT     all  --  *      *       0.0.0.0/0            62.210.115.140       /* www.webmoney.ru */
+    0     0 ACCEPT     all  --  *      *       0.0.0.0/0            37.187.104.200       /* www.webmoney.ru */
+    0     0 ACCEPT     all  --  *      *       0.0.0.0/0            37.187.104.199       /* www.webmoney.ru */
+    0     0 ACCEPT     all  --  *      *       0.0.0.0/0            89.108.126.29        /* www.webmoney.ru */
+    0     0 ACCEPT     all  --  *      *       0.0.0.0/0            88.198.43.118        /* www.webmoney.ru */
+    0     0 ACCEPT     all  --  *      *       0.0.0.0/0            109.72.129.48        /* www.cyberplat.ru */
+    0     0 ACCEPT     all  --  *      *       0.0.0.0/0            91.200.28.56         /* login.wmtransfer.com */
+    0     0 ACCEPT     all  --  *      *       0.0.0.0/0            91.227.52.56         /* login.wmtransfer.com */
+    0     0 ACCEPT     all  --  *      *       0.0.0.0/0            66.211.169.66        /* paypal.com */
+    0     0 ACCEPT     all  --  *      *       0.0.0.0/0            66.211.169.3         /* paypal.com */
+    0     0 ACCEPT     all  --  *      *       0.0.0.0/0            23.59.86.34          /* www.paypal.com */
+
 ```
