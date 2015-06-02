@@ -30,8 +30,7 @@ api = Api(app)
 app.config.update(dict(
     DATABASE=os.path.join(app.root_path, 'pgw.db'),
     INTF_IN='eth1',
-    INTF_OUT='eth2',
-    PORTAL_IP='127.0.0.1:80',
+    PORTAL_IP='192.168.1.18:80',
     DEBUG=True,
 ))
 app.config.from_envvar('PGW_SETTINGS', silent=True)
@@ -48,6 +47,12 @@ def init_db():
 	with app.open_resource('schema.sql', mode='r') as f:
 		db.cursor().executescript(f.read())
 	db.commit()
+
+@app.cli.command('initdb')
+def initdb_command():
+	"""Creates the database tables."""
+	init_db()
+	print('Initialized the database.')
 
 def get_db():
 	"""Opens a new database connection if there is none yet for the
@@ -81,20 +86,31 @@ def tbl_prep():
         chain_pgw = tblf.create_chain('PAYMENT_GW')
 
         rule = iptc.Rule()
+	rule.protocol='udp'
+	rule.create_target('ACCEPT')
+	m = rule.create_match('udp')
+	m.dport='53'
+	rule.in_interface=app.config['INTF_IN']
+        chain_pr.append_rule(rule)
+
+        rule = iptc.Rule()
         rule.create_target('PAYMENT_GW')
 	rule.protocol='tcp'
 	rule.in_interface=app.config['INTF_IN']
-	rule.out_interface=app.config['INTF_OUT']
         chain_pr.append_rule(rule)
 
 	rule = iptc.Rule()
 	rule.protocol='tcp'
 	rule.in_interface=app.config['INTF_IN']
-	rule.out_interface=app.config['INTF_OUT']
 	t = rule.create_target('DNAT')
 	t.to_destination=app.config['PORTAL_IP']
 	m = rule.create_match('tcp')
 	m.dport='80'
+        chain_pr.append_rule(rule)
+
+	rule = iptc.Rule()
+	rule.create_target('DROP')
+	rule.in_interface=app.config['INTF_IN']
         chain_pr.append_rule(rule)
 
         return chain_pgw

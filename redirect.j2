@@ -1,0 +1,15 @@
+server {
+	# listen on out interface
+	listen {{ eth_out_ip }}:80;
+
+	root /usr/share/nginx/html;
+	index index.html index.htm;
+
+	# Make site accessible from http://localhost/
+	server_name localhost;
+
+	location / {
+		try_files $uri $uri/ =404;
+	}
+
+}
