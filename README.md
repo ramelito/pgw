@@ -37,3 +37,49 @@ where 10.0.0.101 is a management ip address mentioned earlier.
 
 ## REST API
 VNF is equipped with RESTful API to peer with orchestrating system. Here are the available REST API operations:
+
+**pgws**
+
+`GET` `/pgw/api/v1.0/pgws` - returns list of payment gateway domains
+
+```
+curl -i http://10.0.0.101/pgw/api/v1.0/pgws
+```
+```
+{
+    "pgws": [
+        {
+            "domain": "www.paypal.com", 
+            "uri": "http://10.0.0.101/pgw/api/v1.0/pgws/30"
+        }, 
+        {
+            "domain": "paypal.com", 
+            "uri": "http://10.0.0.101/pgw/api/v1.0/pgws/29"
+        }, 
+        {
+            "domain": "login.wmtransfer.com", 
+            "uri": "http://10.0.0.101/pgw/api/v1.0/pgws/28"
+        }, 
+        {
+            "domain": "www.cyberplat.ru", 
+            "uri": "http://10.0.0.101/pgw/api/v1.0/pgws/24"
+        }, 
+        {
+            "domain": "www.webmoney.ru", 
+            "uri": "http://10.0.0.101/pgw/api/v1.0/pgws/23"
+        }, 
+        {
+            "domain": "unistream.ru", 
+            "uri": "http://10.0.0.101/pgw/api/v1.0/pgws/7"
+        }, 
+        {
+            "domain": "www.rbkmoney.ru", 
+            "uri": "http://10.0.0.101/pgw/api/v1.0/pgws/6"
+        }, 
+        {
+            "domain": "www.assist.ru", 
+            "uri": "http://10.0.0.101/pgw/api/v1.0/pgws/5"
+        }
+    ]
+}
+```
