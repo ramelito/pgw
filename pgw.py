@@ -30,7 +30,7 @@ api = Api(app)
 app.config.update(dict(
     DATABASE=os.path.join(app.root_path, 'pgw.db'),
     INTF_IN='eth1',
-    PORTAL_IP='192.168.1.18:80',
+    PORTAL_IP='127.0.0.1:80',
     DEBUG=True,
 ))
 app.config.from_envvar('PGW_SETTINGS', silent=True)
