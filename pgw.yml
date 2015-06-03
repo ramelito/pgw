@@ -1,0 +1,91 @@
+---
+# to run this playbook directly on VNF instance
+# uncomment two lines below and comment '- hosts: vnfs'
+#- hosts: 127.0.0.1
+#  connection: local
+- hosts: vnfs
+#  gather_facts: no
+
+  vars:
+    username: '{{ ansible_ssh_user }}'
+    base_path: '/home/{{ username }}/pgw'
+    eth_in_dev: eth1
+    eth_out_dev: eth2
+    eth_out_ip: 192.168.1.18
+    eth_out_nm: 255.255.255.0
+    eth_out_gw: 192.168.1.1
+
+  roles:
+# ansible-galaxy install bennojoy.network_interface
+    - role: bennojoy.network_interface
+      network_ether_interfaces:
+        - device: '{{ eth_in_dev }}'
+          bootproto: static
+          address: 0.0.0.0
+        - device: '{{ eth_out_dev }}'
+          bootproto: static
+          address: '{{ eth_out_ip }}'
+          netmask: '{{ eth_out_nm }}'
+          gateway: '{{ eth_out_gw }}'
+  tasks:
+  - name: install apt packages
+    apt: name={{ item }} update_cache=yes state=present
+    with_items:
+    - iptables
+    - git
+    - python-pip
+    - python-pysqlite2
+    - nginx
+    - supervisor
+   
+  - name: install pip packages
+    pip: name={{ item }}
+    with_items:
+      - dnspython
+      - python-iptables
+      - https://github.com/mitsuhiko/flask/tarball/master
+      - flask-restful
+      - gunicorn
+
+  - name: git clone pgw
+    git: repo=https://github.com/ramelito/pgw.git dest={{ base_path }} accept_hostkey=True
+    register: gitclone
+    sudo: no
+
+  - name: set ip forwarding
+    sysctl: name="net.ipv4.ip_forward" value=1 sysctl_set=yes state=present reload=yes
+
+  - name: fetch templates to local machine
+    fetch: src={{ base_path }}/{{ item }} dest=/tmp/{{ item }} flat=yes
+    with_items:
+      - gunicorn.conf.j2
+      - redirect.j2
+      - restapi.j2
+      - settings.cfg.j2
+
+  - name: install gunicorn.conf
+    template: src=/tmp/gunicorn.conf.j2 dest=/etc/supervisor/conf.d/gunicorn.conf
+
+  - name: install nginx virtualserv
+    template: src=/tmp/{{ item }}.j2 dest=/etc/nginx/sites-available/{{ item }}
+    with_items:
+      - redirect
+      - restapi
+
+  - name: enable nginx virtualserv
+    file: src=/etc/nginx/sites-available/{{ item }} dest=/etc/nginx/sites-enabled/{{ item }}
+    with_items:
+      - redirect
+      - restapi
+
+  - name: install app settings
+    template: src=/tmp/settings.cfg.j2 dest={{ base_path }}/settings.cfg
+
+  - name: init pgw db
+    shell: python -m flask -a {{ base_path }}/pgw.py initdb
+
+  - name: restart supervisor
+    service: name=supervisor state=restarted
+
+  - name: restart nginx
+    service: name=nginx state=restarted
