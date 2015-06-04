@@ -154,7 +154,9 @@ def append_pgw(pgw):
 
 def delete_pgw(pgw):
 	""" Delete payment gw from iptables chain."""
-	chain_pgw = iptc.Chain(iptc.Table(iptc.Table.NAT),'PAYMENT_GW')
+	table = iptc.Table(iptc.Table.NAT)
+	table.autocommit = False
+	chain_pgw = iptc.Chain(table,'PAYMENT_GW')
 	if not iptc.Table(iptc.Table.NAT).is_chain(chain_pgw):
 		tbl_prep()
 		return
@@ -163,6 +165,10 @@ def delete_pgw(pgw):
 	      if 'comment' in m.parameters:
 		 if m.parameters['comment']==pgw:
 		    chain_pgw.delete_rule(r)
+
+	table.commit()
+	table.refresh()
+	table.autocommit = True
 
 @app.teardown_appcontext
 def close_db(error):
