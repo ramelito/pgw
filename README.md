@@ -1,7 +1,7 @@
 # Payment Gateways Virtual Network Function
 
 ### Overview
-Payment Gateways VNF is based on netfilter iptables and delivers easy and convinient way to manage payment gateways ipv4 addresses. The main idea behind this approach is to handle packets only on IP layer. Packets destined to payment gateway are accepted and forwarded, other HTTP (port 80) traffic is transparently redirected to the portal login page. Furthermore this approach is not limited only to payment gateways but can accept any opengarden domains.
+Payment Gateways VNF is based on netfilter iptables as forwarding plane and python application converting domain names to IPv4 addresses as a control plane. It delivers easy and convinient way to manage payment gateways prefixes. The main idea behind this approach is to handle packets only on IP layer. Packets destined to payment gateway are accepted and forwarded, other HTTP (port 80) traffic is transparently redirected to the portal login page. Furthermore this approach is not limited only to payment gateways but can accept any "open-garden" domains.
 
 ### Installation
 To easily install pgw one can use Ansible playbook pgw.yml.
@@ -145,25 +145,25 @@ Chain PAYMENT_GW (1 references)
 Before any packet processing will occur PGW VNF must be programmed with Orchestrator via REST API, then it translates payment gateways domain names to ip addresses and install them into iptables.
 
 ```
+                                             +------------------+                     
+                                             |                  |                     
+                                             |   ORCHESTRATOR   |                     
+                                             |                  |                     
+                                             +---------+--------+                     
+                                                       | REST                         
+                                                       |                              
+                                                       |                              
+                                                       | eth0                         
+                    +----------+              +--------v-------+                      
+                    |          |              |                |                      
++----------+        | BRAS/BNG |              |     PGW VNF    |       +-------------+
+|SUBSCRIBER| (1)    |          | (2)          |                | (4)   |             |
+|          +-------->          +-------------->        +---------------> PAYMENT GW  |
+|          |        |          |          eth1|        |       | eth2  |             |
++----------+        |          |              |        |PORTAL |       +-------------+
+                    |          |              |        |       |                      
+                    +----------+              +--------+-------+                      
 
-                                                    +------------------+                         
-                                                    |                  |                         
-                                                    |   ORCHESTRATOR   |                         
-                                                    |                  |                         
-                                                    +---------+--------+                         
-                                                              | REST                             
-                                                              |                                  
-                                                              |                                  
-                                                              | eth0                             
-                           +----------+              +--------v-------+                          
-                           |          |              |                |                          
-+----------+               | BRAS/BNG |              |     PGW VNF    |           +-------------+
-|SUBSCRIBER|  1            |          | 2            |                | 3         |             |
-|          +--------------->          +-------------->        +-------------------> PAYMENT GW  |
-|          |               |          |          eth1|        |       | eth2      |             |
-+----------+               |          |              |        |PORTAL |           +-------------+
-                           |          |              |        |       |                          
-                           +----------+              +--------+-------+                          
 ```
 1. Subscriber initiates http request to web-server in the Internet (DNS request will be transparently forwarded).
 2. BNG somehow next-hops or next-interfaces packet to PGW VNF.
