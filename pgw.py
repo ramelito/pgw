@@ -195,9 +195,11 @@ class PgwListAPI(Resource):
 	if len(pgws)==0:
 		if (append_pgw(args['domain'])>0):
 			query_db('insert into pgws (domain) values (?)', [args['domain'],])
-	pgws = query_db('select id, domain from pgws order by id desc')
+			pgws = query_db('select id, domain from pgws order by id desc')
+        		return {'pgws': [marshal(pgw, pgw_fields) for pgw in pgws]}, 201
+		else:
+			return {'result': False}, 406
 
-        return {'pgws': [marshal(pgw, pgw_fields) for pgw in pgws]}, 201
 
 class PgwAPI(Resource):
 
