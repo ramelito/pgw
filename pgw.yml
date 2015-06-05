@@ -72,8 +72,8 @@
   - name: init pgw db
     shell: python -m flask -a {{ base_path }}/pgw.py initdb
 
-  - name: restart supervisor
-    service: name=supervisor state=restarted
+  - name: gunicorn restart
+    supervisorctl: name=gunicorn state=started
 
   - name: restart nginx
     service: name=nginx state=restarted
