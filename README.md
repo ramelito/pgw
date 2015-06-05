@@ -25,8 +25,7 @@ pay attention on gateway definition, if you will define gateway for eth0 it will
 
 To run playbook (on the remote Ansible control host) issue:
 ```
-sudo ansible-galaxy install bennojoy.network_interface
-ansible-playbook -s -u ubuntu -K pgw.yml -i invetory
+ansible-playbook -s -u ubuntu -K pgw.yml -i inventory
 ```
 where invetory file may look like:
 ```
