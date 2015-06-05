@@ -73,7 +73,7 @@
     shell: python -m flask -a {{ base_path }}/pgw.py initdb
 
   - name: gunicorn restart
-    supervisorctl: name=gunicorn state=started
+    supervisorctl: name=gunicorn state=restarted
 
   - name: restart nginx
     service: name=nginx state=restarted
