@@ -15,18 +15,6 @@
     eth_out_nm: 255.255.255.0
     eth_out_gw: 192.168.1.1
 
-  roles:
-# ansible-galaxy install bennojoy.network_interface
-    - role: bennojoy.network_interface
-      network_ether_interfaces:
-        - device: '{{ eth_in_dev }}'
-          bootproto: static
-          address: 0.0.0.0
-        - device: '{{ eth_out_dev }}'
-          bootproto: static
-          address: '{{ eth_out_ip }}'
-          netmask: '{{ eth_out_nm }}'
-          gateway: '{{ eth_out_gw }}'
   tasks:
   - name: install apt packages
     apt: name={{ item }} update_cache=yes state=present
@@ -73,7 +61,7 @@
       - restapi
 
   - name: enable nginx virtualserv
-    file: src=/etc/nginx/sites-available/{{ item }} dest=/etc/nginx/sites-enabled/{{ item }}
+    file: src=/etc/nginx/sites-available/{{ item }} dest=/etc/nginx/sites-enabled/{{ item }} state=link
     with_items:
       - redirect
       - restapi
