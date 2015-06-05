@@ -6,20 +6,20 @@ Payment Gateways VNF is based on netfilter iptables as forwarding plane and pyth
 ### Installation
 To easily install pgw one can use Ansible playbook pgw.yml.
 As a base image it is recommened to use Ubuntu 14.04.
-VNF has 3 interfaces, eth1 (in) and eth2 (out) are defined in playbook:
-```
-    eth_in_dev: eth1
-    eth_out_dev: eth2
-    eth_out_ip: 192.168.1.18
-    eth_out_nm: 255.255.255.0
-    eth_out_gw: 192.168.1.1
-```
-eth0 is management interface and must be defined manually before installation process:
+Network interfaces must be manually configured before installation.
 ```
 auto eth0
 iface eth0 inet static
 	address 10.0.0.101
 	netmask 255.255.255.0
+auto eth1
+iface eth1 inet static
+	address 0.0.0.0
+auto eth2
+iface eth2 inet static
+	address 192.168.1.18
+	netmask 255.255.255.0
+	gateway 192.168.1.1
 ```
 pay attention on gateway definition, if you will define gateway for eth0 it will be used as a default route.
 
