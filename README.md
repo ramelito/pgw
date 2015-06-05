@@ -20,6 +20,7 @@ iface eth2 inet static
 	address 192.168.1.18
 	netmask 255.255.255.0
 	gateway 192.168.1.1
+	dns-nameservers 192.168.1.1
 ```
 pay attention on gateway definition, if you will define gateway for eth0 it will be used as a default route.
 
