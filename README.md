@@ -177,3 +177,6 @@ Chain PREROUTING (policy ACCEPT 0 packets, 0 bytes)
     0     0 DROP       all  --  eth1   *       0.0.0.0/0            0.0.0.0/0           
 ```
 packets to payment gw are proccessed with nested chain PAYMENT_GW, which is build from domain names; if packet is not destined to payment gw and has destination port 80, it is transparently redirected to portal and landed to e.g. login page or payment gw link list page, all other traffic is dropped.
+
+### Screencast
+[![PGW VNF Screencast](http://img.youtube.com/vi/eaSh98BOQgM/0.jpg)](http://www.youtube.com/watch?v=eaSh98BOQgM)
