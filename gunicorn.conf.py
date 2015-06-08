@@ -1,4 +1,3 @@
-import multiprocessing
-
 bind = "127.0.0.1:8000"
-workers = multiprocessing.cpu_count() * 2 + 1
+# do not exceed number of workers, access to iptables should not be shared
+workers = 1
