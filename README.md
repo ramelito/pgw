@@ -1,7 +1,7 @@
 # Payment Gateways Virtual Network Function
 
 ### Overview
-Payment Gateways VNF is based on netfilter iptables as forwarding plane and python application converting domain names to IPv4 addresses as a control plane. It delivers easy and convinient way to manage payment gateways prefixes. The main idea behind this approach is to handle packets only on IP layer. Packets destined to payment gateway are accepted and forwarded, other HTTP (port 80) traffic is transparently redirected to the portal login page. Furthermore this approach is not limited only to payment gateways but can accept any "open-garden" domains.
+Payment Gateways VNF is based on netfilter iptables as forwarding plane and python application converting domain names to IPv4 addresses as a control plane. It delivers easy and convenient way to manage payment gateways prefixes. The main idea behind this approach is to handle packets only on IP layer. Packets destined to payment gateway are accepted and forwarded, other HTTP (port 80) traffic is transparently redirected to the portal login page. Furthermore this approach is not limited only to payment gateways but can accept any "open-garden" domains.
 
 ### Installation
 To easily install pgw one can use Ansible playbook pgw.yml.
